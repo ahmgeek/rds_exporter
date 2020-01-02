@@ -13,7 +13,7 @@ for region in regions:
     databases=rdsClient.describe_db_instances()
     if len(databases['DBInstances'])>0:
         for database in databases['DBInstances']:
-            if os.environ['USE_FILTER'] == 'true':
+            if 'USE_FILTER' in os.environ and os.environ['USE_FILTER'] == 'true':
                 allTags = rdsClient.list_tags_for_resource(
                     ResourceName=database['DBInstanceArn']
                 )
