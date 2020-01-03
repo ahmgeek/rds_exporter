@@ -5,15 +5,14 @@ An [AWS RDS](https://aws.amazon.com/ru/rds/) exporter for [Prometheus](https://g
 It gets metrics from both [basic CloudWatch Metrics](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/MonitoringOverview.html)
 and [RDS Enhanced Monitoring via CloudWatch Logs](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Monitoring.OS.html).
 
-Based on [Technofy/cloudwatch_exporter](https://github.com/Technofy/cloudwatch_exporter),
-but very little of the original code remained.
+Based on [Percona RDS exporter](https://github.com/percona/rds_exporter) which was forked from [Technofy/cloudwatch_exporter](https://github.com/Technofy/cloudwatch_exporter).  
 
-Forked from [Percona RDS exporter](https://github.com/percona/rds_exporter). **Enhancements:**
+**Enhancements:**
 * Dockerfile was rewritten to multistage build
-* Added script `generate_rds_list.py` that creates list of RDS instances.  
-Script supports filtering: if `USE_FILTER` environment variable was set with `true` value, only metrics for instances with tag `UseExporter=true` will be listed. 
-* Supervisord feature for Docker. RDS_exporter itself does not support configuration file rereading - in Docker it is launched via supervisord.  
-Every 20 minutes configuration file is regenerated and rds_exporter is restarted (via cron job).
+* Added the script `generate_rds_list.py` which creates list of RDS instances.  
+The script supports filtering: if the environment variable `USE_FILTER` has the value `true`, only metrics for instances with the tag `UseExporter=true` will be listed. 
+* Added the Supervisord for process management. The RDS exporter itself does not support the automatic reload of application after a configuration change - in this Dockerfile we manage it over supervisord.  
+Every 20 minutes the configuration file is compiled and rds_exporter is eventually restarted (via cron job).
 ## Quick start
 
 Create configration file `config.yml` (either manually or via `generate_rds_list.py` script):
@@ -74,17 +73,17 @@ scrape_configs:
         - 127.0.0.1:9042
 ```
 
-`honor_labels: true` is important because exporter returns metrics with `instance` label set.
+`honor_labels: true` is important because the exporter returns metrics with `instance` label set.
 
 ### Docker
 #### Building
 Clone repo and build it as usual docker image:
 ```
-dokcer build . -t rds_exporter 
+docker build . -t rds_exporter 
 ```
 
 #### Launching
-* Pass credentials either via `AWS_ACCESS_KEY_ID`/ `AWS_SECRET_ACCESS_KEY` environment variables or via `~/.aws/credentials` file
+* Pass your credentials either via `AWS_ACCESS_KEY_ID`/ `AWS_SECRET_ACCESS_KEY` environment variables or create the `~/.aws/credentials` file
 * Expose port for exporter
 * Pass `USE_FILTER` environment variable if you want to filter instances by tag  
 
@@ -97,5 +96,5 @@ docker run -p 9042:9042 -e USE_FILTER=true -e AWS_ACCESS_KEY_ID=<xxxxx> -e AWS_S
 
 Exporter synthesizes [node_exporter](https://github.com/prometheus/node_exporter) -like metrics where possible.
 
-You can see a list of basic monitoring metrics [there](https://github.com/percona/rds_exporter/blob/master/basic/testdata/all.txt)
-and a list of enhanced monitoring metrics in text files [there](https://github.com/percona/rds_exporter/tree/master/enhanced/testdata).
+You can see a list of basic monitoring metrics [here](https://github.com/percona/rds_exporter/blob/master/basic/testdata/all.txt)
+and a list of enhanced monitoring metrics in text files [here](https://github.com/percona/rds_exporter/tree/master/enhanced/testdata).
