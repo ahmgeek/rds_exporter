@@ -94,7 +94,7 @@ docker run -p 9042:9042 -e USE_FILTER=true -e AWS_ACCESS_KEY_ID=<xxxxx> -e AWS_S
 
 ## Metrics
 
-Exporter synthesizes [node_exporter](https://github.com/prometheus/node_exporter) -like metrics where possible.
+Exporter synthesizes hardware and OS metrics as well as [node_exporter](https://github.com/prometheus/node_exporter) where possible.
 
 You can see a list of basic monitoring metrics [here](https://github.com/percona/rds_exporter/blob/master/basic/testdata/all.txt)
 and a list of enhanced monitoring metrics in text files [here](https://github.com/percona/rds_exporter/tree/master/enhanced/testdata).

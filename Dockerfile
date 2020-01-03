@@ -32,3 +32,4 @@ RUN chmod +x /etc/rds_exporter/entrypoint.sh
 
 EXPOSE      9042
 ENTRYPOINT  [ "/etc/rds_exporter/entrypoint.sh" ]
+CMD [ "/usr/bin/supervisord" ]
