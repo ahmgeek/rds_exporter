@@ -1,21 +1,21 @@
 # RDS Exporter
 
-[![Release](https://img.shields.io/github/release/percona/rds_exporter.svg?style=flat)](https://github.com/percona/rds_exporter/releases/latest)
-[![Build Status](https://travis-ci.com/percona/rds_exporter.svg?branch=master)](https://travis-ci.com/percona/rds_exporter)
-[![Go Report Card](https://goreportcard.com/badge/github.com/percona/rds_exporter)](https://goreportcard.com/report/github.com/percona/rds_exporter)
-[![CLA assistant](https://cla-assistant.percona.com/readme/badge/percona/rds_exporter)](https://cla-assistant.percona.com/percona/rds_exporter)
-[![codecov.io Code Coverage](https://img.shields.io/codecov/c/github/percona/rds_exporter.svg?maxAge=2592000)](https://codecov.io/github/percona/rds_exporter?branch=master)
 
 An [AWS RDS](https://aws.amazon.com/ru/rds/) exporter for [Prometheus](https://github.com/prometheus/prometheus).
 It gets metrics from both [basic CloudWatch Metrics](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/MonitoringOverview.html)
 and [RDS Enhanced Monitoring via CloudWatch Logs](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Monitoring.OS.html).
 
-Based on [Technofy/cloudwatch_exporter](https://github.com/Technofy/cloudwatch_exporter),
-but very little of the original code remained.
+Based on [Percona RDS exporter](https://github.com/percona/rds_exporter) which was forked from [Technofy/cloudwatch_exporter](https://github.com/Technofy/cloudwatch_exporter).  
 
+**Enhancements:**
+* Dockerfile was rewritten to multistage build
+* Added the script `generate_rds_list.py` which creates list of RDS instances.  
+The script supports filtering: if the environment variable `USE_FILTER` has the value `true`, only metrics for instances with the tag `UseExporter=true` will be listed. 
+* Added the Supervisord for process management. The RDS exporter itself does not support the automatic reload of application after a configuration change - in this Dockerfile we manage it over supervisord.  
+Every 20 minutes the configuration file is compiled and rds_exporter is eventually restarted (via cron job).
 ## Quick start
 
-Create configration file `config.yml`:
+Create configration file `config.yml` (either manually or via `generate_rds_list.py` script):
 
 ```yaml
 ---
@@ -73,11 +73,28 @@ scrape_configs:
         - 127.0.0.1:9042
 ```
 
-`honor_labels: true` is important because exporter returns metrics with `instance` label set.
+`honor_labels: true` is important because the exporter returns metrics with `instance` label set.
+
+### Docker
+#### Building
+Clone repo and build it as usual docker image:
+```
+docker build . -t rds_exporter 
+```
+
+#### Launching
+* Pass your credentials either via `AWS_ACCESS_KEY_ID`/ `AWS_SECRET_ACCESS_KEY` environment variables or create the `~/.aws/credentials` file
+* Expose port for exporter
+* Pass `USE_FILTER` environment variable if you want to filter instances by tag  
+
+```
+docker run -p 9042:9042 -e USE_FILTER=true -e AWS_ACCESS_KEY_ID=<xxxxx> -e AWS_SECRET_ACCESS_KEY=<yyyyy> rds-exporter
+```
+
 
 ## Metrics
 
-Exporter synthesizes [node_exporter](https://github.com/prometheus/node_exporter)-like metrics where possible.
+Exporter synthesizes hardware and OS metrics as well as [node_exporter](https://github.com/prometheus/node_exporter) where possible.
 
-You can see a list of basic monitoring metrics [there](https://github.com/percona/rds_exporter/blob/master/basic/testdata/all.txt)
-and a list of enhanced monitoring metrics in text files [there](https://github.com/percona/rds_exporter/tree/master/enhanced/testdata).
+You can see a list of basic monitoring metrics [here](https://github.com/percona/rds_exporter/blob/master/basic/testdata/all.txt)
+and a list of enhanced monitoring metrics in text files [here](https://github.com/percona/rds_exporter/tree/master/enhanced/testdata).
