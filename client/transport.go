@@ -22,7 +22,6 @@ func newTransport() *transport {
 		t: &http.Transport{
 			MaxIdleConnsPerHost: 5,
 			IdleConnTimeout:     2 * time.Minute,
-			Proxy: http.ProxyFromEnvironment,
 		},
 		l: log.With("component", "transport"),
 
